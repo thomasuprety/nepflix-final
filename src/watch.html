@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Card Loop</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .bg-info {
+        background-color: #54b4d3;
+      }
+      .card-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        max-width: 100%;
+        margin: 20px;
+      }
+
+      .card {
+        flex: 0 0 calc(20% - 10px);
+        padding: 10px 20px;
+        background-color: #f2f2f2;
+      }
+      .card-container .card img {
+        object-fit: cover;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="bg-gray-200">
+      <div class="container mx-auto py-8">
+        <div
+          class="bg-info flex h-28 w-full items-center justify-center rounded-lg mb-8"
+        >
+          <p class="text-neutral-50">NepFlix</p>
+        </div>
+        <div class="max-w-4xl mx-auto mb-8">
+          <form id="searchForm" class="flex items-center">
+            <input
+              id="searchInput"
+              type="text"
+              name="search"
+              placeholder="Search..."
+              class="px-4 py-2 rounded-l-md border border-gray-400 focus:outline-none focus:border-indigo-500"
+            />
+            <button
+              type="submit"
+              class="bg-indigo-500 text-white px-4 py-2 rounded-r-md"
+            >
+              Search
+            </button>
+          </form>
+        </div>
+
+        <div id="searchResults" class="flex flex-wrap -mx-4">
+          <!-- Search results will be displayed here -->
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document
+        .getElementById("searchForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault(); // Prevent default form submission
+
+          const searchInput = document
+            .getElementById("searchInput")
+            .value.trim();
+          console.log(searchInput);
+          if (searchInput !== "") {
+            const url = `https://search.imdbot.workers.dev/?q=${encodeURIComponent(
+              searchInput
+            )}`;
+            console.log(url);
+            fetch(url, {
+              method: "POST",
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                // console.log(data);
+                // Handle search results here
+                displaySearchResults(data);
+              })
+              .catch((error) => {
+                console.error("Error fetching search results:", error);
+              });
+          }
+        });
+
+      function displaySearchResults(results) {
+        const searchResultsContainer = document.getElementById("searchResults");
+        searchResultsContainer.innerHTML = ""; // Clear previous results
+        array = [...results.description];
+        console.log(array);
+
+        // Loop through each card object
+        // Create an array to store the HTML markup for each card
+        let cardHTMLArray = [];
+
+        // Loop through each item in the array
+        array.forEach((card) => {
+          // Extract properties from each card object
+          let img = card["#IMG_POSTER"];
+          let title = card["#TITLE"];
+          let desc = card["#AKA"];
+
+          // Generate HTML markup for each card and push it to the array
+          cardHTMLArray.push(`
+        <div class="card">
+            <img src="${img}" alt="${title}">
+            <div class="card-body">
+                <h5 class="card-title">${title}</h5>
+            </div>
+        </div>
+    `);
+        });
+
+        // Join all the HTML markup in the array into a single string
+        let allCardsHTML = cardHTMLArray.join("");
+
+        // Create a container div element to hold all the cards
+        let containerDiv = document.createElement("div");
+        containerDiv.classList.add("card-container");
+
+        // Set the innerHTML of the container div to the concatenated HTML markup
+        containerDiv.innerHTML = allCardsHTML;
+
+        // Append the container div to the document body
+        document.body.appendChild(containerDiv);
+      }
+    </script>
+  </body>
+</html>
